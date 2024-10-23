@@ -7,7 +7,7 @@ contract FundMe {
 
     mapping(address => uint256) public fundersToAmount;
 
-    AggregatorV3Interface internal dataFeed;
+    AggregatorV3Interface public dataFeed;
 
     uint256 constant MINIMUM_VALUE = 100 * 10 ** 18; //USD
 
@@ -23,6 +23,8 @@ contract FundMe {
 
     bool public getFundSuccess = false;
 
+    event FundWithdrawByOwner(uint256);
+
     modifier onlyOwner() {
         require(msg.sender == owner, "this function can only be called by owner");
         _;
@@ -33,8 +35,8 @@ contract FundMe {
         _;
     }
     
-    constructor(uint256 _lockTime){
-        dataFeed = AggregatorV3Interface(0xC9E46135AFfA765D04eA04057d2De31f1Dd7E41A);
+    constructor(uint256 _lockTime, address dataFeedAddr){
+        dataFeed = AggregatorV3Interface(dataFeedAddr);
         owner = msg.sender;
         deploymentTimestamp = block.timestamp;
         lockTime = _lockTime;
@@ -78,10 +80,12 @@ contract FundMe {
         
         // call: transfer ETH with data return value of function and bool 
         bool success;
-        (success,) = payable(msg.sender).call{value: address(this).balance}("");
+        uint256 balance = address(this).balance;
+        (success,) = payable(msg.sender).call{value: balance}("");
         require(success, "transfer tx failed");
         fundersToAmount[msg.sender] = 0;
         getFundSuccess = true;
+        emit FundWithdrawByOwner(balance);
     }
 
     function reFund() external windowClosed {

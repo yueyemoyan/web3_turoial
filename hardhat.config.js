@@ -1,6 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox")
 require("dotenv").config()
 require("./task")
+require('hardhat-deploy')
+require("@nomicfoundation/hardhat-ethers")
+require("hardhat-deploy")
+require("hardhat-deploy-ethers")
 
 const SEPOLIA_URL = process.env.SEPOLIA_URL
 const PRIVATE_KEY = process.env.PRIVATE_KEY
@@ -25,4 +29,15 @@ module.exports = {
       sepolia: ETHERSCAN_APIKEY
     }
   },
+  namedAccounts: {
+    firstAccount: {
+      default: 0
+    },
+    secondAccount: {
+      default: 1
+    }
+  },
+  gasReporter: {
+    enabled: false  // open then gas view after running test
+  }
 };
